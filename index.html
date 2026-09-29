@@ -112,16 +112,13 @@
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
       var W = 0, H = 0;
 
-      // padding beyond the word's own box, so the irregular clouds can
-      // billow past the letters instead of stopping at a hard rectangle
       var PAD_X_RATIO = 0.20;
       var PAD_Y_RATIO = 0.85;
 
-      var layers = []; // {canvas, driftAmp, driftSpeedX/Y, phase, alpha, blend}
+      var layers = [];
 
       function rand(min, max) { return min + Math.random() * (max - min); }
 
-      // draw the smoke photo, scaled/positioned, onto a given context
       function drawFogSource(dctx, w, h, scale, ox, oy, alpha) {
         var iw = fogImg.naturalWidth, ih = fogImg.naturalHeight;
         var s = Math.max(w / iw, h / ih) * scale;
@@ -133,8 +130,6 @@
         dctx.globalAlpha = 1;
       }
 
-      // build a soft, irregular blob-shaped alpha mask (several overlapping
-      // radial gradients) so the layer has no straight edges at all
       function buildBlobMask(w, h, blobCount, sizeMin, sizeMax) {
         var m = document.createElement('canvas');
         m.width = w; m.height = h;
@@ -184,11 +179,8 @@
       function buildAllLayers() {
         layers = [];
         var minDim = Math.min(W, H);
-        // back: broad, dim, distant wisps
         buildLayer(1.5, 4, minDim * 0.30, minDim * 0.5, 0.55, 'source-over');
-        // mid: brighter, screen blend so overlaps glow where they meet
         buildLayer(1.15, 5, minDim * 0.22, minDim * 0.38, 0.55, 'screen');
-        // front: tighter, denser clumps sitting closest to the viewer
         buildLayer(0.85, 6, minDim * 0.14, minDim * 0.26, 0.85, 'source-over');
       }
 
@@ -282,7 +274,6 @@
           erodeAt(pointer.x, pointer.y);
         }
 
-        // slowly regenerate each drifting layer back over any erased areas
         for (var i = 0; i < layers.length; i++) {
           paintLayer(layers[i], t, 0.035);
         }
@@ -290,8 +281,6 @@
         requestAnimationFrame(tick);
       }
 
-      // recompute once the real font has actually swapped in, in case the
-      // fallback font (used briefly on first paint) had a different width
       function safeResize() { resize(); }
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(safeResize);
